@@ -1,5 +1,7 @@
 require "bundler/setup"
 require "orelrb/evaluator"
+require "pry"
+
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
