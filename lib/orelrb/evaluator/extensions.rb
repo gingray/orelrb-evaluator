@@ -4,4 +4,8 @@ class String
   rescue ArgumentError, TypeError
     false
   end
+
+  def whitespace?
+    self.strip.empty?
+  end
 end

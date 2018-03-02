@@ -5,35 +5,65 @@ module Orelrb::Evaluator
       @text = text
       @pos = 0
       @current_token = 1
+      @current_char = @text[@pos]
+    end
+
+
+    def advance
+      @pos+= 1
+      if @pos > (@text.length - 1)
+        @current_char = nil
+      else
+        @current_char = @text[@pos]
+      end
+    end
+
+    def skip_whitespace
+      while @current_char != nil && @current_char.whitespace?
+        advance
+      end
+    end
+
+    def integer
+      result = ''
+      while @current_char != nil && @current_char.number?
+        result+= @current_char
+        advance
+      end
+      result.to_i
     end
 
     def get_next_token
-      text = @text
-      if @pos > (text.length - 1)
-        return Token.new(EOF, nil)
+      while @current_char != nil
+        if @current_char.whitespace?
+          skip_whitespace
+          next
+        end
+
+        if @current_char.number?
+          return Token.new(INTEGER, integer)
+        end
+
+        if @current_char == '+'
+          advance
+          return Token.new(PLUS, '+')
+        end
+
+        if @current_char == '-'
+          advance
+          return Token.new(MINUS, '-')
+        end
+        raise_error
       end
-
-      current_char = text[@pos]
-
-      if current_char.number?
-        token = Token.new(INTEGER, Integer(current_char))
-        @pos+= 1
-        return token
-      end
-
-      if current_char == '+'
-        token = Token.new(PLUS, current_char)
-        @pos+= 1
-        return token
-      end
-
-      raise_error
+      Token.new(EOF, nil)
     end
 
     def eat token_type
       if @current_token.type == token_type
         @current_token = get_next_token
       else
+        binding.pry
+
         raise_error
       end
     end
@@ -43,11 +73,19 @@ module Orelrb::Evaluator
       left = @current_token
       eat(INTEGER)
       op = @current_token
-      eat(PLUS)
+      if op.type == PLUS
+        eat(PLUS)
+      else
+        eat(MINUS)
+      end
       right = @current_token
       eat(INTEGER)
 
-      result = left.value + right.value
+      if op.type == PLUS
+        result = left.value + right.value
+      else
+        result = left.value - right.value
+      end
     end
 
     def raise_error
