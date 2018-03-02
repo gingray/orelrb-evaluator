@@ -10,20 +10,25 @@ RSpec.describe Orelrb::Evaluator do
     expect(result).to eq 4
   end
 
-  it "simple evaluator error PLUS" do
+  it "simple evaluator PLUS" do
     text = "2+ 20"
     service = Orelrb::Evaluator::Interpreter.new text
     result = service.expr
     expect(result).to eq 22
   end
 
-  it "simple evaluator error MINUS" do
+  it "simple evaluator MINUS" do
     text = "2 -20"
     service = Orelrb::Evaluator::Interpreter.new text
     result = service.expr
     expect(result).to eq -18
   end
 
-
+  it "complex evaluator" do
+    text = "2 - 20 + 10"
+    service = Orelrb::Evaluator::Interpreter.new text
+    result = service.expr
+    expect(result).to eq -8
+  end
 
 end

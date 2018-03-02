@@ -8,7 +8,6 @@ module Orelrb::Evaluator
       @current_char = @text[@pos]
     end
 
-
     def advance
       @pos+= 1
       if @pos > (@text.length - 1)
@@ -31,6 +30,12 @@ module Orelrb::Evaluator
         advance
       end
       result.to_i
+    end
+
+    def term
+      token = @current_token
+      eat(INTEGER)
+      token.value
     end
 
     def get_next_token
@@ -62,30 +67,25 @@ module Orelrb::Evaluator
       if @current_token.type == token_type
         @current_token = get_next_token
       else
-        binding.pry
-
         raise_error
       end
     end
 
     def expr
       @current_token = get_next_token
-      left = @current_token
-      eat(INTEGER)
-      op = @current_token
-      if op.type == PLUS
-        eat(PLUS)
-      else
-        eat(MINUS)
+      result = term
+      while [PLUS, MINUS].include? @current_token.type
+        token = @current_token
+        if token.type == PLUS
+          eat(PLUS)
+          result = result + term
+        end
+        if token.type == MINUS
+          eat(MINUS)
+          result = result - term
+        end
       end
-      right = @current_token
-      eat(INTEGER)
-
-      if op.type == PLUS
-        result = left.value + right.value
-      else
-        result = left.value - right.value
-      end
+      result
     end
 
     def raise_error
